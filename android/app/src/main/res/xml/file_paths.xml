@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths xmlns:android="http://schemas.android.com/apk/res/android">
+    <!--
+    File Provider paths for AKEL Panic Button
+    Allows sharing files with other apps securely
+    -->
+
+    <!-- External storage -->
+    <external-path
+        name="external_files"
+        path="." />
+
+    <!-- Cache directory -->
+    <external-cache-path
+        name="external_cache"
+        path="." />
+
+    <!-- Files directory -->
+    <files-path
+        name="files"
+        path="." />
+
+    <!-- Cache directory (internal) -->
+    <cache-path
+        name="cache"
+        path="." />
+
+    <!-- Pictures directory -->
+    <external-files-path
+        name="pictures"
+        path="Pictures/" />
+
+    <!-- Evidence directory -->
+    <external-files-path
+        name="evidence"
+        path="Evidence/" />
+
+    <!-- Recordings directory -->
+    <external-files-path
+        name="recordings"
+        path="Recordings/" />
+
+    <!-- Documents directory -->
+    <external-files-path
+        name="documents"
+        path="Documents/" />
+</paths>

@@ -1,63 +1,61 @@
 class UserProfile {
+  final String id;
+  final String email;
   final String name;
-  final int age;
-  final String sex;
-  final String address;
-  final String? profilePicturePath;
-  final String emergencyMessage;
-  final List<String> emergencyContacts;
+  final String? phone;
+  final DateTime createdAt;
+  final DateTime lastLoginAt;
 
   UserProfile({
+    required this.id,
+    required this.email,
     required this.name,
-    required this.age,
-    required this.sex,
-    required this.address,
-    this.profilePicturePath,
-    this.emergencyMessage = "Emergency! I need immediate assistance. Please send help to my location.",
-    this.emergencyContacts = const [],
+    this.phone,
+    required this.createdAt,
+    required this.lastLoginAt,
   });
 
-  Map<String, dynamic> toJson() {
-    return {
-      'name': name,
-      'age': age,
-      'sex': sex,
-      'address': address,
-      'profilePicturePath': profilePicturePath,
-      'emergencyMessage': emergencyMessage,
-      'emergencyContacts': emergencyContacts,
-    };
-  }
-
-  factory UserProfile.fromJson(Map<String, dynamic> json) {
+  factory UserProfile.fromMap(Map<String, dynamic> map) {
     return UserProfile(
-      name: json['name'] ?? '',
-      age: json['age'] ?? 0,
-      sex: json['sex'] ?? '',
-      address: json['address'] ?? '',
-      profilePicturePath: json['profilePicturePath'],
-      emergencyMessage: json['emergencyMessage'] ?? "Emergency! I need immediate assistance. Please send help to my location.",
-      emergencyContacts: List<String>.from(json['emergencyContacts'] ?? []),
+      id: map['id'] as String? ?? '',
+      email: map['email'] as String? ?? '',
+      name: map['name'] as String? ?? '',
+      phone: map['phone'] as String?,
+      createdAt: map['createdAt'] != null
+          ? DateTime.parse(map['createdAt'] as String)
+          : DateTime.now(),
+      lastLoginAt: map['lastLoginAt'] != null
+          ? DateTime.parse(map['lastLoginAt'] as String)
+          : DateTime.now(),
     );
   }
 
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'email': email,
+      'name': name,
+      'phone': phone,
+      'createdAt': createdAt.toIso8601String(),
+      'lastLoginAt': lastLoginAt.toIso8601String(),
+    };
+  }
+
   UserProfile copyWith({
+    String? id,
+    String? email,
     String? name,
-    int? age,
-    String? sex,
-    String? address,
-    String? profilePicturePath,
-    String? emergencyMessage,
-    List<String>? emergencyContacts,
+    String? phone,
+    DateTime? createdAt,
+    DateTime? lastLoginAt,
   }) {
     return UserProfile(
+      id: id ?? this.id,
+      email: email ?? this.email,
       name: name ?? this.name,
-      age: age ?? this.age,
-      sex: sex ?? this.sex,
-      address: address ?? this.address,
-      profilePicturePath: profilePicturePath ?? this.profilePicturePath,
-      emergencyMessage: emergencyMessage ?? this.emergencyMessage,
-      emergencyContacts: emergencyContacts ?? this.emergencyContacts,
+      phone: phone ?? this.phone,
+      createdAt: createdAt ?? this.createdAt,
+      lastLoginAt: lastLoginAt ?? this.lastLoginAt,
     );
   }
 }

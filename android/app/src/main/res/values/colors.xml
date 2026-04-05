@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- AKEL Panic Button Color Palette -->
+
+    <!-- Primary Colors -->
+    <color name="primary_red">#DC143C</color>
+    <color name="deep_black">#0A0A0A</color>
+    <color name="carbon_fiber">#1A1A1A</color>
+
+    <!-- Neon Accents -->
+    <color name="neon_blue">#00E5FF</color>
+    <color name="neon_purple">#B388FF</color>
+    <color name="neon_green">#00FF87</color>
+    <color name="neon_orange">#FF6E40</color>
+    <color name="neon_pink">#FF4081</color>
+
+    <!-- Status Colors -->
+    <color name="success_green">#4CAF50</color>
+    <color name="warning_orange">#FF9800</color>
+    <color name="error_red">#F44336</color>
+
+    <!-- Notification Color -->
+    <color name="notification_color">#DC143C</color>
+
+    <!-- Background Colors -->
+    <color name="background_dark">#0A0A0A</color>
+    <color name="background_panel">#1A1A1A</color>
+
+    <!-- Text Colors -->
+    <color name="text_primary">#FFFFFF</color>
+    <color name="text_secondary">#B0B0B0</color>
+    <color name="text_disabled">#666666</color>
+
+    <!-- Metallic Colors -->
+    <color name="metal_chrome">#C0C0C0</color>
+    <color name="metal_silver">#909090</color>
+    <color name="metal_dark">#606060</color>
+
+    <!-- Transparent Overlays -->
+    <color name="overlay_dark">#80000000</color>
+    <color name="overlay_light">#40FFFFFF</color>
+</resources>

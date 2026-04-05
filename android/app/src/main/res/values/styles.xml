@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- AKEL Panic Button Theme Styles -->
+
+    <!-- Launch Theme (Shown while app is loading) -->
+    <style name="LaunchTheme" parent="@android:style/Theme.Light.NoTitleBar">
+        <!-- Show a splash screen on the activity until Flutter renders its first frame -->
+        <item name="android:windowBackground">@drawable/launch_background</item>
+        <item name="android:windowFullscreen">false</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:statusBarColor">@color/deep_black</item>
+        <item name="android:navigationBarColor">@color/deep_black</item>
+    </style>
+
+    <!-- Normal Theme (After app loads) -->
+    <style name="NormalTheme" parent="@android:style/Theme.Light.NoTitleBar">
+        <item name="android:windowBackground">?android:colorBackground</item>
+        <item name="android:windowFullscreen">false</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:statusBarColor">@color/deep_black</item>
+        <item name="android:navigationBarColor">@color/deep_black</item>
+    </style>
+
+    <!-- Notification Theme -->
+    <style name="NotificationTheme" parent="Theme.AppCompat">
+        <item name="colorPrimary">@color/primary_red</item>
+        <item name="colorPrimaryDark">@color/deep_black</item>
+        <item name="colorAccent">@color/neon_blue</item>
+    </style>
+
+    <!-- Emergency Alert Theme -->
+    <style name="EmergencyTheme" parent="Theme.AppCompat.Dialog.Alert">
+        <item name="colorPrimary">@color/primary_red</item>
+        <item name="colorAccent">@color/neon_blue</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:background">@color/carbon_fiber</item>
+    </style>
+</resources>

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!--
+    Network Security Configuration for AKEL Panic Button
+    Allows HTTP in debug mode, HTTPS in production
+    -->
+
+    <!-- Production: HTTPS only -->
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+
+    <!-- Debug: Allow localhost for testing -->
+    <debug-overrides>
+        <trust-anchors>
+            <certificates src="system" />
+            <certificates src="user" />
+        </trust-anchors>
+    </debug-overrides>
+
+    <!-- Allow specific domains if needed -->
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">localhost</domain>
+        <domain includeSubdomains="true">10.0.2.2</domain>
+        <domain includeSubdomains="true">127.0.0.1</domain>
+    </domain-config>
+
+    <!-- Emergency services domains (always allow) -->
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">api.elevenlabs.io</domain>
+        <domain includeSubdomains="true">polly.amazonaws.com</domain>
+        <domain includeSubdomains="true">firebase.google.com</domain>
+    </domain-config>
+</network-security-config>

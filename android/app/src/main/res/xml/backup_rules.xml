@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<full-backup-content>
+    <!--
+    Backup rules for AKEL Panic Button
+    Controls what data gets backed up to Google Drive
+    -->
+
+    <!-- Include shared preferences -->
+    <include domain="sharedpref" path="."/>
+
+    <!-- Include database files -->
+    <include domain="database" path="."/>
+
+    <!-- Include files directory -->
+    <include domain="file" path="."/>
+
+    <!-- Exclude sensitive data -->
+    <exclude domain="sharedpref" path="FlutterSecureStorage"/>
+    <exclude domain="database" path="secure.db"/>
+    <exclude domain="file" path="recordings/"/>
+    <exclude domain="file" path="evidence/"/>
+</full-backup-content>
