@@ -1,182 +1,175 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../models/user/user_profile.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-// Get current user
   User? get currentUser => _auth.currentUser;
-
-// Auth state changes stream
   Stream<User?> get authStateChanges => _auth.authStateChanges();
 
 // Sign in with email and password
-  Future<UserProfile?> signInWithEmailPassword({
+  Future<UserCredential> signInWithEmailPassword({
     required String email,
     required String password,
   }) async {
     try {
-      final credential = await _auth.signInWithEmailAndPassword(
+      print('Attempting sign in...');
+
+      final userCredential = await _auth.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
 
-      if (credential.user != null) {
-// Update last login
-        await _firestore.collection('users').doc(credential.user!.uid).update({
-          'lastLoginAt': DateTime.now().toIso8601String(),
-        });
+      print('Sign in successful! UID: ${userCredential.user?.uid}');
 
-        return await getUserProfile(credential.user!.uid);
-      }
-      return null;
-    } on FirebaseAuthException catch (e) {
-      String message;
-      switch (e.code) {
-        case 'user-not-found':
-          message = 'No user found with this email.';
-          break;
-        case 'wrong-password':
-          message = 'Wrong password provided.';
-          break;
-        case 'invalid-email':
-          message = 'Invalid email address.';
-          break;
-        case 'user-disabled':
-          message = 'This user account has been disabled.';
-          break;
-        default:
-          message = 'Login failed: ${e.message}';
-      }
-      throw Exception(message);
+      return userCredential;
     } catch (e) {
-      throw Exception('Sign in failed: $e');
+      print('Sign in error: $e');
+      throw Exception('Login failed: $e');
     }
   }
 
-// Sign up with email and password
-  Future<UserProfile?> signUpWithEmailPassword({
+// Sign up with email and password - AUTH ONLY
+  Future<UserCredential> signUpWithEmailPassword({
     required String email,
     required String password,
     required String name,
     String? phone,
   }) async {
     try {
-      final credential = await _auth.createUserWithEmailAndPassword(
+      print('========================================');
+      print('STEP 1: Creating Firebase Auth account ONLY');
+      print('Email: $email');
+      print('========================================');
+
+      final userCredential = await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
 
-      if (credential.user != null) {
-        final userProfile = UserProfile(
-          id: credential.user!.uid,
-          email: email,
-          name: name,
-          phone: phone,
-          createdAt: DateTime.now(),
-          lastLoginAt: DateTime.now(),
-        );
+      print('SUCCESS! Auth account created!');
+      print('UID: ${userCredential.user?.uid}');
+      print('Email: ${userCredential.user?.email}');
+      print('========================================');
 
-// Save user profile to Firestore
-        await _firestore
-            .collection('users')
-            .doc(credential.user!.uid)
-            .set(userProfile.toMap());
-
-        return userProfile;
-      }
-      return null;
-    } on FirebaseAuthException catch (e) {
-      String message;
-      switch (e.code) {
-        case 'weak-password':
-          message = 'Password is too weak. Use at least 6 characters.';
-          break;
-        case 'email-already-in-use':
-          message = 'An account already exists for this email.';
-          break;
-        case 'invalid-email':
-          message = 'Invalid email address.';
-          break;
-        default:
-          message = 'Registration failed: ${e.message}';
-      }
-      throw Exception(message);
+      return userCredential;
     } catch (e) {
-      throw Exception('Sign up failed: $e');
+      print('Registration error: $e');
+      throw Exception('Registration failed: $e');
+    }
+  }
+
+// Create user profile in Firestore - SEPARATE FROM AUTH
+  Future<void> createUserProfile({
+    required String uid,
+    required String name,
+    required String email,
+    String? phone,
+  }) async {
+    try {
+      print('========================================');
+      print('STEP 2: Creating Firestore user profile');
+      print('UID: $uid');
+      print('Waiting 2 seconds for auth to settle...');
+      print('========================================');
+
+// Wait for auth to fully propagate
+      await Future.delayed(Duration(seconds: 2));
+
+      final userData = {
+        'id': uid,
+        'name': name,
+        'email': email,
+        'phone': phone ?? '',
+        'createdAt': DateTime.now().toIso8601String(),
+        'lastLoginAt': DateTime.now().toIso8601String(),
+      };
+
+      print('Data to save:');
+      print(userData);
+      print('Saving to path: users/$uid');
+
+      await _firestore
+          .collection('users')
+          .doc(uid)
+          .set(userData);
+
+      print('========================================');
+      print('SUCCESS! Firestore profile created!');
+      print('========================================');
+    } catch (e) {
+      print('========================================');
+      print('ERROR creating Firestore profile: $e');
+      print('========================================');
+      throw Exception('Failed to create profile: $e');
     }
   }
 
 // Get user profile
-  Future<UserProfile?> getUserProfile(String uid) async {
+  Future<Map<String, dynamic>?> getUserProfile(String uid) async {
     try {
+      print('Getting user profile for UID: $uid');
+
       final doc = await _firestore.collection('users').doc(uid).get();
-      if (doc.exists && doc.data() != null) {
-        return UserProfile.fromMap(doc.data()!);
+
+      if (doc.exists) {
+        print('User profile found!');
+        return doc.data();
+      } else {
+        print('WARNING: User profile does not exist yet');
+        return null;
       }
-      return null;
     } catch (e) {
+      print('Error getting user profile: $e');
       throw Exception('Failed to get user profile: $e');
     }
   }
 
 // Update user profile
-  Future<void> updateUserProfile(UserProfile profile) async {
+  Future<void> updateUserProfile({
+    required String uid,
+    String? name,
+    String? phone,
+  }) async {
     try {
-      await _firestore
-          .collection('users')
-          .doc(profile.id)
-          .update(profile.toMap());
-    } catch (e) {
-      throw Exception('Failed to update profile: $e');
-    }
-  }
+      print('Updating user profile for UID: $uid');
 
-// Sign out
-  Future<void> signOut() async {
-    try {
-      await _auth.signOut();
+      final updates = <String, dynamic>{};
+      if (name != null) updates['name'] = name;
+      if (phone != null) updates['phone'] = phone;
+
+      if (updates.isNotEmpty) {
+        await _firestore.collection('users').doc(uid).update(updates);
+        print('Profile updated successfully!');
+      }
     } catch (e) {
-      throw Exception('Sign out failed: $e');
+      print('Error updating profile: $e');
+      throw Exception('Failed to update profile: $e');
     }
   }
 
 // Reset password
   Future<void> resetPassword(String email) async {
     try {
+      print('Sending password reset email to: $email');
       await _auth.sendPasswordResetEmail(email: email);
-    } on FirebaseAuthException catch (e) {
-      String message;
-      switch (e.code) {
-        case 'invalid-email':
-          message = 'Invalid email address.';
-          break;
-        case 'user-not-found':
-          message = 'No user found with this email.';
-          break;
-        default:
-          message = 'Password reset failed: ${e.message}';
-      }
-      throw Exception(message);
+      print('Password reset email sent!');
     } catch (e) {
-      throw Exception('Password reset failed: $e');
+      print('Error sending reset email: $e');
+      throw Exception('Failed to send reset email: $e');
     }
   }
 
-// Delete user account
-  Future<void> deleteAccount() async {
+// Sign out
+  Future<void> signOut() async {
     try {
-      final user = _auth.currentUser;
-      if (user != null) {
-// Delete user data from Firestore
-        await _firestore.collection('users').doc(user.uid).delete();
-// Delete auth account
-        await user.delete();
-      }
+      print('Signing out...');
+      await _auth.signOut();
+      print('Signed out successfully!');
     } catch (e) {
-      throw Exception('Account deletion failed: $e');
+      print('Error signing out: $e');
+      throw Exception('Sign out failed: $e');
     }
   }
 }

@@ -1,14 +1,6 @@
 import 'package:flutter/material.dart';
 
 class CustomTextField extends StatelessWidget {
-  final TextEditingController controller;
-  final String label;
-  final IconData? prefixIcon;
-  final TextInputType? keyboardType;
-  final String? Function(String?)? validator;
-  final int maxLines;
-  final bool obscureText;
-  final void Function(String)? onChanged;
 
   const CustomTextField({
     super.key,
@@ -21,6 +13,14 @@ class CustomTextField extends StatelessWidget {
     this.obscureText = false,
     this.onChanged,
   });
+  final TextEditingController controller;
+  final String label;
+  final IconData? prefixIcon;
+  final TextInputType? keyboardType;
+  final String? Function(String?)? validator;
+  final int maxLines;
+  final bool obscureText;
+  final void Function(String)? onChanged;
 
   @override
   Widget build(BuildContext context) {

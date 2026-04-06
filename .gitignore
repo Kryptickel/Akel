@@ -1,113 +1,115 @@
-# Miscellaneous
-*.class
-*.log
-*.pyc
-*.swp
-.DS_Store
-.atom/
-.buildlog/
-.history
-.svn/
-migrate_working_dir/
+# ==================== AKEL PANIC BUTTON .gitignore ====================
+# Prevents sensitive data from being committed to GitHub
+# ======================================================================
 
-# IntelliJ related
-*.iml
-*.ipr
-*.iws
-.idea/
+# ===== CRITICAL: DO NOT COMMIT THESE =====
+# API Keys & Secrets
+.env
+.env.local
+.env.production
+*.key
+*.pem
+secrets/
+config/private/
 
-# The .vscode folder contains launch configuration and tasks you configure in
-# VS Code which you may wish to be included in version control, so this line
-# is commented out by default.
-#.vscode/
+# Firebase Configuration (contains API keys)
+google-services.json
+GoogleService-Info.plist
+firebase-adminsdk-*.json
 
-# Flutter/Dart/Pub related
-**/doc/api/
-**/ios/Flutter/.last_build_id
+# ===== Flutter/Dart =====
+# Build outputs
+**/build/
+**/android/app/build/
+**/ios/build/
+**/web/build/
+
+# Flutter specific
 .dart_tool/
 .flutter-plugins
 .flutter-plugins-dependencies
 .packages
 .pub-cache/
 .pub/
-/build/
+pubspec.lock
 
-# Symbolication related
-app.*.symbols
+# ===== Android =====
+*.iml
+.gradle
+local.properties
+.idea/
+*.hprof
+*.ap_
+*.dex
+*.class
 
-# Obfuscation related
-app.*.map.json
+# Android Keystore (NEVER commit these!)
+*.jks
+*.keystore
+key.properties
 
-# Android Studio will place build artifacts here
-/android/app/debug
-/android/app/profile
-/android/app/release
-
-# iOS related
-**/ios/**/*.mode1v3
-**/ios/**/*.mode2v3
-**/ios/**/*.moved-aside
-**/ios/**/*.pbxuser
-**/ios/**/*.perspectivev3
-**/ios/**/*sync/
-**/ios/**/.sconsign.dblite
-**/ios/**/.tags*
-**/ios/**/.vagrant/
-**/ios/**/DerivedData/
-**/ios/**/Icon?
-**/ios/**/Pods/
-**/ios/**/.symlinks/
-**/ios/**/profile
-**/ios/**/xcuserdata
-**/ios/.generated/
-**/ios/Flutter/.last_build_id
+# ===== iOS =====
+**/ios/Flutter/flutter_export_environment.sh
+**/ios/Pods/
+**/ios/.symlinks/
 **/ios/Flutter/App.framework
 **/ios/Flutter/Flutter.framework
 **/ios/Flutter/Flutter.podspec
 **/ios/Flutter/Generated.xcconfig
-**/ios/Flutter/ephemeral/
-**/ios/Flutter/app.flx
-**/ios/Flutter/app.zip
-**/ios/Flutter/flutter_assets/
+**/ios/.generated/
 **/ios/Flutter/flutter_export_environment.sh
 **/ios/ServiceDefinitions.json
 **/ios/Runner/GeneratedPluginRegistrant.*
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+xcuserdata/
+*.moved-aside
+*.xccheckout
+*.xcscmblueprint
 
-# Web related
-lib/generated_plugin_registrant.dart
+# ===== IDE =====
+# Android Studio
+.idea/
+*.iml
+.gradle/
+local.properties
 
-# Exceptions to above rules.
-!/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages
+# VS Code
+.vscode/
 
-# macOS related
-**/macos/Flutter/GeneratedPluginRegistrant.swift
+# ===== macOS =====
+.DS_Store
+.AppleDouble
+.LSOverride
 
-# Windows related
-**/windows/flutter/generated_plugin_registrant.cc
-**/windows/flutter/generated_plugin_registrant.h
-**/windows/flutter/generated_plugins.cmake
+# ===== Windows =====
+Thumbs.db
+Desktop.ini
 
-# Linux related
-**/linux/flutter/generated_plugin_registrant.cc
-**/linux/flutter/generated_plugin_registrant.h
-**/linux/flutter/generated_plugins.cmake
+# ===== Log Files =====
+*.log
 
-# Coverage
-coverage/
-
-# Temporary files
+# ===== Temporary Files =====
 *.tmp
 *.temp
+*.swp
+*.swo
+*~
 
-# Local development
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+# ===== Sensitive User Data =====
+# Don't commit user databases or credentials
+*.db
+*.sqlite
+*.sqlite3
+credentials.json
+auth_token.txt
 
-# User-specific files
-*.suo
-*.user
-*.userosscache
-*.sln.docstates
+# ===== Large Files =====
+# Don't commit large media files
+*.mp4
+*.mov
+*.avi
+*.mkv
+# (unless they're small assets needed for app)

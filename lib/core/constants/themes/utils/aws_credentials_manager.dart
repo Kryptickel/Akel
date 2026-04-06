@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
@@ -20,14 +21,14 @@ class AWSCredentialsManager {
   // Hardcoded configuration (replace with your actual values)
   // TODO: Move these to a config file or environment
   static const String _region = 'us-east-1';
-  static const String _lexBotId = 'K8A276W4BC';
-  static const String _lexBotAliasId = 'MRGY7SMUPH';
+  static const String _lexBotId = 'LTDFCALG00';
+  static const String _lexBotAliasId = 'TSTALIASID';
   static const String _lexLocaleId = 'en_US';
 
   // AWS Credentials (IMPORTANT: Never commit these to git!)
   // TODO: Move to secure storage or use Cognito
-  static const String? _awsAccessKeyId = null; // Replace with your key
-  static const String? _awsSecretAccessKey = null; // Replace with your secret
+  static const String? _awsAccessKeyId ='AKIA2EM7JUJDU7O7DWO4';
+  static const String? _awsSecretAccessKey ='wVbUNCCbcVb+jQICVKSJBd04+MkRaYSMXxWyrcbx';
   static const String? _awsSessionToken = null; // Optional
   static const String? _cognitoIdentityPoolId = null; // Optional for Cognito
   static const String? _cognitoRegion = null; // Optional

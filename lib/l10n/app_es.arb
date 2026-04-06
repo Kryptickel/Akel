@@ -1,0 +1,25 @@
+{
+ "@@locale": "es",
+
+ "appTitle": "Botón de Pánico AKEL",
+ "welcome": "Bienvenido",
+ "panic": "PÁNICO",
+ "silent": "SILENCIOSO",
+ "sending": "ENVIANDO...",
+ "sendingIn": "ENVIANDO EN...",
+ "silentMode": "MODO SILENCIOSO",
+ "cancel": "CANCELAR",
+
+ "tapForAlert": "Toca para alerta • Mantén presionado para silencioso • Agita para alerta rápida",
+ "quickSettings": "Configuración Rápida",
+ "emergencyContacts": "Contactos de Emergencia",
+ "profile": "Perfil",
+ "settings": "Configuración",
+ "signOut": "Cerrar Sesión",
+ "ok": "OK",
+ "yes": "Sí",
+ "no": "No",
+ "save": "Guardar",
+ "delete": "Eliminar",
+ "cancel_action": "Cancelar"
+}

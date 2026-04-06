@@ -7,12 +7,12 @@ import 'package:speech_to_text/speech_to_text.dart' as stt;
 class AWSService {
   // AWS Configuration
   static const String region = 'us-east-1';
-  static const String accessKey = 'YOUR_AWS_ACCESS_KEY';
-  static const String secretKey = 'YOUR_AWS_SECRET_KEY';
+  static const String accessKey = 'AKIA2EM7JUJDU7O7DWO4';
+  static const String secretKey = 'wVbUNCCbcVb+jQICVKSJBd04+MkRaYSMXxWyrcbx';
 
   // Lex Bot Configuration
-  static const String botId = 'K8A276W4BC';
-  static const String botAliasId = 'MRGY7SMUPH';
+  static const String botId = 'LTDFCALG00';
+  static const String botAliasId = 'TSTALIASID';
   static const String localeId = 'en_US';
 
   // Service instances

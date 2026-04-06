@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:akel_panic_button/widgets/panic_button.dart';
+import 'package:akel/widgets/panic_button.dart'; // ✅ FIX: Changed from akel_panic_button to akel
 
 void main() {
   group('PanicButton Widget Tests', () {
@@ -19,13 +19,13 @@ void main() {
         ),
       );
 
-      // Verify the button is displayed
+// Verify the button is displayed
       expect(find.text('EMERGENCY'), findsOneWidget);
       expect(find.text('PANIC'), findsOneWidget);
       expect(find.text('Tap for alert • Hold for silent'), findsOneWidget);
       expect(find.byIcon(Icons.warning), findsOneWidget);
 
-      // Test tap functionality
+// Test tap functionality
       await tester.tap(find.byType(PanicButton));
       await tester.pump();
 
@@ -48,7 +48,7 @@ void main() {
         ),
       );
 
-      // Test long press functionality
+// Test long press functionality
       await tester.longPress(find.byType(PanicButton));
       await tester.pump();
 
@@ -66,15 +66,15 @@ void main() {
         ),
       );
 
-      // Verify initial state
+// Verify initial state
       expect(find.byType(PanicButton), findsOneWidget);
 
-      // Let some animation frames pass
+// Let some animation frames pass
       await tester.pump(const Duration(milliseconds: 100));
       await tester.pump(const Duration(milliseconds: 500));
       await tester.pump(const Duration(seconds: 1));
 
-      // Button should still be there after animations
+// Button should still be there after animations
       expect(find.byType(PanicButton), findsOneWidget);
     });
 

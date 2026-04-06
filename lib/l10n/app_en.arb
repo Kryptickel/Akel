@@ -1,0 +1,29 @@
+{
+"@@locale": "en",
+
+"appTitle": "AKEL Panic Button",
+"@appTitle": {
+"description": "Application title"
+},
+
+"welcome": "Welcome",
+"panic": "PANIC",
+"silent": "SILENT",
+"sending": "SENDING...",
+"sendingIn": "SENDING IN...",
+"silentMode": "SILENT MODE",
+"cancel": "CANCEL",
+
+"tapForAlert": "Tap for alert • Hold for silent • Shake for quick alert",
+"quickSettings": "Quick Settings",
+"emergencyContacts": "Emergency Contacts",
+"profile": "Profile",
+"settings": "Settings",
+"signOut": "Sign Out",
+"ok": "OK",
+"yes": "Yes",
+"no": "No",
+"save": "Save",
+"delete": "Delete",
+"cancel_action": "Cancel"
+}

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../services/weather_alert_service.dart';
+import '../services/weather_alerts_service.dart';
 import '../services/vibration_service.dart';
 import '../services/sound_service.dart';
 import 'package:intl/intl.dart';

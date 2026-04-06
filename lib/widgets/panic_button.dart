@@ -2,9 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class PanicButton extends StatefulWidget {
-  final VoidCallback onPressed;
-  final VoidCallback? onLongPress;
-  final double size;
 
   const PanicButton({
     super.key,
@@ -12,6 +9,9 @@ class PanicButton extends StatefulWidget {
     this.onLongPress,
     this.size = 200,
   });
+  final VoidCallback onPressed;
+  final VoidCallback? onLongPress;
+  final double size;
 
   @override
   State<PanicButton> createState() => _PanicButtonState();

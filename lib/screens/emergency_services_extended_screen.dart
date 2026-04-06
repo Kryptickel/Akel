@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:akel_panic_button/providers/auth_provider.dart' as akel;
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../providers/auth_provider.dart' hide AuthProvider;
+import '../providers/auth_provider.dart' as app_auth; // FIX: Add alias
 import '../services/vibration_service.dart';
 import '../services/sound_service.dart';
 import 'fire_emergency_screen.dart';
@@ -24,7 +23,7 @@ import 'emergency_services_screen.dart';
 /// ================================================================
 
 class EmergencyServicesExtendedScreen extends StatefulWidget {
-  const EmergencyServicesExtendedScreen({Key? key}) : super(key: key);
+  const EmergencyServicesExtendedScreen({super.key});
 
   @override
   State<EmergencyServicesExtendedScreen> createState() =>
@@ -68,7 +67,7 @@ class _EmergencyServicesExtendedScreenState
         locationSettings: const LocationSettings(accuracy: LocationAccuracy.high),
       );
     } catch (e) {
-      debugPrint('Location error: ' + e.toString());
+      debugPrint('Location error: $e');
     } finally {
       if (mounted) setState(() => _isLoadingLocation = false);
     }
@@ -76,17 +75,21 @@ class _EmergencyServicesExtendedScreenState
 
   Future<void> _makeCall(String number) async {
     await _vibrationService.light();
+
+    // FIX: Check mounted before showDialog
+    if (!mounted) return;
+
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: Theme.of(context).cardColor,
         title: Text(
-          'Call ' + number + '?',
+          'Call $number?',
           style: TextStyle(
               color: Theme.of(context).textTheme.headlineMedium?.color),
         ),
         content: Text(
-          'This will dial ' + number + ' immediately.',
+          'This will dial $number immediately.',
           style: TextStyle(
               color: Theme.of(context).textTheme.bodyLarge?.color),
         ),
@@ -102,26 +105,21 @@ class _EmergencyServicesExtendedScreenState
         ],
       ),
     );
+
     if (confirmed == true) {
-      final uri = Uri.parse('tel:' + number);
+      final uri = Uri.parse('tel:$number');
       if (await canLaunchUrl(uri)) await launchUrl(uri);
     }
   }
 
   String _getLocationString() {
     if (_currentPosition == null) return 'Location unavailable';
-    return 'Lat: ' +
-        _currentPosition!.latitude.toStringAsFixed(5) +
-        ', Lng: ' +
-        _currentPosition!.longitude.toStringAsFixed(5);
+    return 'Lat: ${_currentPosition!.latitude.toStringAsFixed(5)}, Lng: ${_currentPosition!.longitude.toStringAsFixed(5)}';
   }
 
   String _getMapsLink() {
     if (_currentPosition == null) return '';
-    return 'https://maps.google.com/?q=' +
-        _currentPosition!.latitude.toString() +
-        ',' +
-        _currentPosition!.longitude.toString();
+    return 'https://maps.google.com/?q=${_currentPosition!.latitude},${_currentPosition!.longitude}';
   }
 
   @override
@@ -184,10 +182,8 @@ class _EmergencyServicesExtendedScreenState
           ),
           const SizedBox(height: 16),
 
-          // Link to existing fire screen
           Card(
-            shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -198,7 +194,7 @@ class _EmergencyServicesExtendedScreenState
                       Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: Colors.red.withOpacity(0.1),
+                          color: Colors.red.withValues(alpha: 0.1),
                           shape: BoxShape.circle,
                         ),
                         child: const Icon(Icons.local_fire_department,
@@ -326,32 +322,12 @@ class _EmergencyServicesExtendedScreenState
   Widget _buildPoliceIncidentForm() {
     final incidentTypes = [
       {'value': 'theft', 'label': 'Theft/Robbery', 'icon': Icons.money_off},
-      {
-        'value': 'assault',
-        'label': 'Assault',
-        'icon': Icons.personal_injury
-      },
-      {
-        'value': 'suspicious',
-        'label': 'Suspicious Activity',
-        'icon': Icons.visibility
-      },
-      {
-        'value': 'vandalism',
-        'label': 'Vandalism',
-        'icon': Icons.home_repair_service
-      },
+      {'value': 'assault', 'label': 'Assault', 'icon': Icons.personal_injury},
+      {'value': 'suspicious', 'label': 'Suspicious Activity', 'icon': Icons.visibility},
+      {'value': 'vandalism', 'label': 'Vandalism', 'icon': Icons.home_repair_service},
       {'value': 'domestic', 'label': 'Domestic Violence', 'icon': Icons.warning},
-      {
-        'value': 'accident',
-        'label': 'Traffic Accident',
-        'icon': Icons.car_crash
-      },
-      {
-        'value': 'missing',
-        'label': 'Missing Person',
-        'icon': Icons.person_search
-      },
+      {'value': 'accident', 'label': 'Traffic Accident', 'icon': Icons.car_crash},
+      {'value': 'missing', 'label': 'Missing Person', 'icon': Icons.person_search},
       {'value': 'other', 'label': 'Other', 'icon': Icons.report},
     ];
 
@@ -361,8 +337,7 @@ class _EmergencyServicesExtendedScreenState
 
     return StatefulBuilder(
       builder: (context, setFormState) => Card(
-        shape:
-        RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -382,20 +357,18 @@ class _EmergencyServicesExtendedScreenState
                 children: incidentTypes.map((type) {
                   final isSelected = selectedType == type['value'];
                   return GestureDetector(
-                    onTap: () => setFormState(
-                            () => selectedType = type['value'] as String),
+                    onTap: () => setFormState(() => selectedType = type['value'] as String),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 6),
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                       decoration: BoxDecoration(
                         color: isSelected
-                            ? Colors.blue.withOpacity(0.2)
+                            ? Colors.blue.withValues(alpha: 0.2)
                             : Colors.transparent,
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
                           color: isSelected
                               ? Colors.blue
-                              : Colors.grey.withOpacity(0.4),
+                              : Colors.grey.withValues(alpha: 0.4),
                           width: isSelected ? 2 : 1,
                         ),
                       ),
@@ -411,9 +384,7 @@ class _EmergencyServicesExtendedScreenState
                             style: TextStyle(
                               fontSize: 12,
                               color: isSelected ? Colors.blue : null,
-                              fontWeight: isSelected
-                                  ? FontWeight.bold
-                                  : null,
+                              fontWeight: isSelected ? FontWeight.bold : null,
                             ),
                           ),
                         ],
@@ -429,8 +400,7 @@ class _EmergencyServicesExtendedScreenState
                 decoration: InputDecoration(
                   labelText: 'Description',
                   hintText: 'Describe what happened...',
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8)),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                 ),
               ),
               const SizedBox(height: 12),
@@ -439,8 +409,7 @@ class _EmergencyServicesExtendedScreenState
                 decoration: InputDecoration(
                   labelText: 'Suspect Description (optional)',
                   hintText: 'Height, clothing, direction of travel...',
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8)),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                   prefixIcon: const Icon(Icons.person_search),
                 ),
               ),
@@ -448,21 +417,17 @@ class _EmergencyServicesExtendedScreenState
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: Colors.blue.withOpacity(0.05),
+                  color: Colors.blue.withValues(alpha: 0.05),
                   borderRadius: BorderRadius.circular(8),
-                  border:
-                  Border.all(color: Colors.blue.withOpacity(0.2)),
+                  border: Border.all(color: Colors.blue.withValues(alpha: 0.2)),
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.location_on,
-                        color: Colors.blue, size: 16),
+                    const Icon(Icons.location_on, color: Colors.blue, size: 16),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        _isLoadingLocation
-                            ? 'Getting location...'
-                            : _getLocationString(),
+                        _isLoadingLocation ? 'Getting location...' : _getLocationString(),
                         style: const TextStyle(fontSize: 12),
                       ),
                     ),
@@ -479,8 +444,7 @@ class _EmergencyServicesExtendedScreenState
                     backgroundColor: Colors.blue[900],
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10)),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   ),
                   onPressed: () => _submitPoliceReport(
                     incidentType: selectedType,
@@ -502,6 +466,9 @@ class _EmergencyServicesExtendedScreenState
     required String suspectDescription,
   }) async {
     if (description.isEmpty) {
+      // FIX: Check mounted
+      if (!mounted) return;
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
             content: Text('Please describe the incident'),
@@ -517,8 +484,7 @@ class _EmergencyServicesExtendedScreenState
     await _soundService.playWarning();
 
     try {
-      final docRef =
-      await _firestore.collection('police_reports').add({
+      final docRef = await _firestore.collection('police_reports').add({
         'userId': user.uid,
         'incidentType': incidentType,
         'description': description,
@@ -534,81 +500,71 @@ class _EmergencyServicesExtendedScreenState
         'status': 'submitted',
       });
 
-      if (mounted) {
-        showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            backgroundColor: Theme.of(context).cardColor,
-            title: Row(
-              children: [
-                const Icon(Icons.check_circle,
-                    color: Colors.green, size: 28),
-                const SizedBox(width: 12),
-                Text(
-                  'Report Submitted',
-                  style: TextStyle(
-                      color: Theme.of(context)
-                          .textTheme
-                          .headlineMedium
-                          ?.color),
-                ),
-              ],
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Your police report has been logged.',
-                  style: TextStyle(
-                      color: Theme.of(context)
-                          .textTheme
-                          .bodyLarge
-                          ?.color),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Report ID: ' +
-                      docRef.id.substring(0, 8).toUpperCase(),
-                  style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.blue),
-                ),
-                const SizedBox(height: 16),
-                const Text(
-                  'If this is an active emergency call 911 immediately.',
-                  style: TextStyle(
-                      color: Colors.orange,
-                      fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('Close')),
-              ElevatedButton.icon(
-                icon: const Icon(Icons.phone),
-                label: const Text('CALL 911'),
-                style:
-                ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                onPressed: () {
-                  Navigator.pop(context);
-                  _makeCall('911');
-                },
+      // FIX: Check mounted before showDialog
+      if (!mounted) return;
+
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          backgroundColor: Theme.of(context).cardColor,
+          title: Row(
+            children: [
+              const Icon(Icons.check_circle, color: Colors.green, size: 28),
+              const SizedBox(width: 12),
+              Text(
+                'Report Submitted',
+                style: TextStyle(
+                    color: Theme.of(context).textTheme.headlineMedium?.color),
               ),
             ],
           ),
-        );
-      }
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Your police report has been logged.',
+                style: TextStyle(
+                    color: Theme.of(context).textTheme.bodyLarge?.color),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Report ID: ${docRef.id.substring(0, 8).toUpperCase()}',
+                style: const TextStyle(
+                    fontWeight: FontWeight.bold, color: Colors.blue),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'If this is an active emergency call 911 immediately.',
+                style: TextStyle(
+                    color: Colors.orange, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Close')),
+            ElevatedButton.icon(
+              icon: const Icon(Icons.phone),
+              label: const Text('CALL 911'),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+              onPressed: () {
+                Navigator.pop(context);
+                _makeCall('911');
+              },
+            ),
+          ],
+        ),
+      );
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text('Failed: ' + e.toString()),
-              backgroundColor: Colors.red),
-        );
-      }
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text('Failed: $e'),
+            backgroundColor: Colors.red),
+      );
     }
   }
 
@@ -666,40 +622,16 @@ class _EmergencyServicesExtendedScreenState
 
   Widget _buildAmbulanceForm() {
     final emergencyTypes = [
-      {
-        'value': 'cardiac',
-        'label': 'Cardiac Arrest',
-        'icon': Icons.favorite_border
-      },
+      {'value': 'cardiac', 'label': 'Cardiac Arrest', 'icon': Icons.favorite_border},
       {'value': 'breathing', 'label': 'Breathing Problems', 'icon': Icons.air},
       {'value': 'stroke', 'label': 'Stroke', 'icon': Icons.psychology},
-      {
-        'value': 'injury',
-        'label': 'Severe Injury',
-        'icon': Icons.personal_injury
-      },
-      {
-        'value': 'unconscious',
-        'label': 'Unconscious',
-        'icon': Icons.airline_seat_flat
-      },
-      {
-        'value': 'allergic',
-        'label': 'Allergic Reaction',
-        'icon': Icons.warning
-      },
+      {'value': 'injury', 'label': 'Severe Injury', 'icon': Icons.personal_injury},
+      {'value': 'unconscious', 'label': 'Unconscious', 'icon': Icons.airline_seat_flat},
+      {'value': 'allergic', 'label': 'Allergic Reaction', 'icon': Icons.warning},
       {'value': 'diabetic', 'label': 'Diabetic Emergency', 'icon': Icons.bloodtype},
       {'value': 'overdose', 'label': 'Overdose', 'icon': Icons.medication},
-      {
-        'value': 'pregnancy',
-        'label': 'Pregnancy Emergency',
-        'icon': Icons.child_friendly
-      },
-      {
-        'value': 'other',
-        'label': 'Other Medical',
-        'icon': Icons.medical_services
-      },
+      {'value': 'pregnancy', 'label': 'Pregnancy Emergency', 'icon': Icons.child_friendly},
+      {'value': 'other', 'label': 'Other Medical', 'icon': Icons.medical_services},
     ];
 
     String selectedType = 'injury';
@@ -710,8 +642,7 @@ class _EmergencyServicesExtendedScreenState
 
     return StatefulBuilder(
       builder: (context, setFormState) => Card(
-        shape:
-        RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -731,20 +662,18 @@ class _EmergencyServicesExtendedScreenState
                 children: emergencyTypes.map((type) {
                   final isSelected = selectedType == type['value'];
                   return GestureDetector(
-                    onTap: () => setFormState(
-                            () => selectedType = type['value'] as String),
+                    onTap: () => setFormState(() => selectedType = type['value'] as String),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 6),
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                       decoration: BoxDecoration(
                         color: isSelected
-                            ? Colors.green.withOpacity(0.2)
+                            ? Colors.green.withValues(alpha: 0.2)
                             : Colors.transparent,
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
                           color: isSelected
                               ? Colors.green
-                              : Colors.grey.withOpacity(0.4),
+                              : Colors.grey.withValues(alpha: 0.4),
                           width: isSelected ? 2 : 1,
                         ),
                       ),
@@ -753,17 +682,14 @@ class _EmergencyServicesExtendedScreenState
                         children: [
                           Icon(type['icon'] as IconData,
                               size: 14,
-                              color:
-                              isSelected ? Colors.green : Colors.grey),
+                              color: isSelected ? Colors.green : Colors.grey),
                           const SizedBox(width: 4),
                           Text(
                             type['label'] as String,
                             style: TextStyle(
                               fontSize: 12,
                               color: isSelected ? Colors.green : null,
-                              fontWeight: isSelected
-                                  ? FontWeight.bold
-                                  : null,
+                              fontWeight: isSelected ? FontWeight.bold : null,
                             ),
                           ),
                         ],
@@ -774,7 +700,6 @@ class _EmergencyServicesExtendedScreenState
               ),
               const SizedBox(height: 16),
 
-              // Conscious / Breathing toggles
               Row(
                 children: [
                   Expanded(
@@ -802,7 +727,7 @@ class _EmergencyServicesExtendedScreenState
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.red.withOpacity(0.1),
+                    color: Colors.red.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(color: Colors.red),
                   ),
@@ -834,8 +759,7 @@ class _EmergencyServicesExtendedScreenState
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(
                   labelText: 'Patient Age (approximate)',
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8)),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                   prefixIcon: const Icon(Icons.person),
                 ),
               ),
@@ -845,25 +769,21 @@ class _EmergencyServicesExtendedScreenState
                 maxLines: 3,
                 decoration: InputDecoration(
                   labelText: 'Additional Notes',
-                  hintText:
-                  'Known conditions, medications, allergies...',
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8)),
+                  hintText: 'Known conditions, medications, allergies...',
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                 ),
               ),
               const SizedBox(height: 12),
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: Colors.green.withOpacity(0.05),
+                  color: Colors.green.withValues(alpha: 0.05),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                      color: Colors.green.withOpacity(0.2)),
+                  border: Border.all(color: Colors.green.withValues(alpha: 0.2)),
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.location_on,
-                        color: Colors.green, size: 16),
+                    const Icon(Icons.location_on, color: Colors.green, size: 16),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
@@ -886,8 +806,7 @@ class _EmergencyServicesExtendedScreenState
                     backgroundColor: Colors.green[900],
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10)),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   ),
                   onPressed: () => _submitAmbulanceRequest(
                     emergencyType: selectedType,
@@ -911,8 +830,8 @@ class _EmergencyServicesExtendedScreenState
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: value
-            ? color.withOpacity(0.1)
-            : Colors.red.withOpacity(0.1),
+            ? color.withValues(alpha: 0.1)
+            : Colors.red.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: value ? color : Colors.red),
       ),
@@ -929,7 +848,8 @@ class _EmergencyServicesExtendedScreenState
           Switch(
             value: value,
             onChanged: onChanged,
-            activeColor: color,
+            activeTrackColor: color, // FIX: Replace activeColor
+            inactiveTrackColor: Colors.red.withValues(alpha: 0.3),
           ),
           Text(
             value ? 'YES' : 'NO',
@@ -957,11 +877,10 @@ class _EmergencyServicesExtendedScreenState
     await _soundService.playWarning();
 
     try {
-      final authProvider =
-      Provider.of<akel.AuthProvider>(context, listen: false);
+      // FIX: Use app_auth alias
+      final authProvider = Provider.of<app_auth.AuthProvider>(context, listen: false);
 
-      final docRef =
-      await _firestore.collection('ambulance_requests').add({
+      final docRef = await _firestore.collection('ambulance_requests').add({
         'userId': user.uid,
         'userName': authProvider.userProfile?['name'] ?? 'User',
         'emergencyType': emergencyType,
@@ -981,118 +900,105 @@ class _EmergencyServicesExtendedScreenState
         'estimatedArrival': '8-12 minutes',
       });
 
-      if (mounted) {
-        showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (context) => AlertDialog(
-            backgroundColor: Theme.of(context).cardColor,
-            title: Row(
-              children: [
-                const Icon(Icons.emergency,
-                    color: Colors.green, size: 28),
-                const SizedBox(width: 12),
-                Text(
-                  'Ambulance Dispatched',
-                  style: TextStyle(
-                      color: Theme.of(context)
-                          .textTheme
-                          .headlineMedium
-                          ?.color),
-                ),
-              ],
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.green.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                        color: Colors.green.withOpacity(0.3)),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'EMS is on the way',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context)
-                              .textTheme
-                              .headlineMedium
-                              ?.color,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      const Text('Estimated arrival: 8-12 minutes',
-                          style: TextStyle(color: Colors.green)),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Request ID: ' +
-                            docRef.id.substring(0, 8).toUpperCase(),
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: Theme.of(context)
-                              .textTheme
-                              .bodySmall
-                              ?.color,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 12),
-                if (!isConscious || !isBreathing)
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: Colors.red.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Text(
-                      'START CPR NOW if person is unresponsive and not breathing',
-                      style: TextStyle(
-                          color: Colors.red,
-                          fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                const SizedBox(height: 8),
-                const Text(
-                  'Keep the person still and comfortable until help arrives.',
-                  style: TextStyle(color: Colors.orange),
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('Close')),
-              ElevatedButton.icon(
-                icon: const Icon(Icons.phone),
-                label: const Text('CALL 911'),
-                style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red),
-                onPressed: () {
-                  Navigator.pop(context);
-                  _makeCall('911');
-                },
+      // FIX: Check mounted
+      if (!mounted) return;
+
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => AlertDialog(
+          backgroundColor: Theme.of(context).cardColor,
+          title: Row(
+            children: [
+              const Icon(Icons.emergency, color: Colors.green, size: 28),
+              const SizedBox(width: 12),
+              Text(
+                'Ambulance Dispatched',
+                style: TextStyle(
+                    color: Theme.of(context).textTheme.headlineMedium?.color),
               ),
             ],
           ),
-        );
-      }
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.green.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.green.withValues(alpha: 0.3)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'EMS is on the way',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).textTheme.headlineMedium?.color,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    const Text('Estimated arrival: 8-12 minutes',
+                        style: TextStyle(color: Colors.green)),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Request ID: ${docRef.id.substring(0, 8).toUpperCase()}',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: Theme.of(context).textTheme.bodySmall?.color,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+              if (!isConscious || !isBreathing)
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.red.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Text(
+                    'START CPR NOW if person is unresponsive and not breathing',
+                    style: TextStyle(
+                        color: Colors.red, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              const SizedBox(height: 8),
+              const Text(
+                'Keep the person still and comfortable until help arrives.',
+                style: TextStyle(color: Colors.orange),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Close')),
+            ElevatedButton.icon(
+              icon: const Icon(Icons.phone),
+              label: const Text('CALL 911'),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+              onPressed: () {
+                Navigator.pop(context);
+                _makeCall('911');
+              },
+            ),
+          ],
+        ),
+      );
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text('Failed: ' + e.toString()),
-              backgroundColor: Colors.red),
-        );
-      }
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text('Failed: $e'),
+            backgroundColor: Colors.red),
+      );
     }
   }
 
@@ -1123,10 +1029,9 @@ class _EmergencyServicesExtendedScreenState
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.red.withOpacity(0.1),
+                color: Colors.red.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
-                border:
-                Border.all(color: Colors.red.withOpacity(0.4)),
+                border: Border.all(color: Colors.red.withValues(alpha: 0.4)),
               ),
               child: Column(
                 children: [
@@ -1135,10 +1040,7 @@ class _EmergencyServicesExtendedScreenState
                   Text(
                     'MULTI-AGENCY DISPATCH',
                     style: TextStyle(
-                      color: Theme.of(context)
-                          .textTheme
-                          .headlineMedium
-                          ?.color,
+                      color: Theme.of(context).textTheme.headlineMedium?.color,
                       fontWeight: FontWeight.bold,
                       fontSize: 18,
                       letterSpacing: 1,
@@ -1148,10 +1050,7 @@ class _EmergencyServicesExtendedScreenState
                   Text(
                     'Alert all emergency services simultaneously',
                     style: TextStyle(
-                        color: Theme.of(context)
-                            .textTheme
-                            .bodySmall
-                            ?.color,
+                        color: Theme.of(context).textTheme.bodySmall?.color,
                         fontSize: 12),
                     textAlign: TextAlign.center,
                   ),
@@ -1172,33 +1071,17 @@ class _EmergencyServicesExtendedScreenState
             ),
             const SizedBox(height: 12),
 
-            _buildAgencyToggle(
-                'Fire Department',
-                Icons.local_fire_department,
-                Colors.red,
-                fireDept,
-                    (val) => setPageState(() => fireDept = val)),
+            _buildAgencyToggle('Fire Department', Icons.local_fire_department,
+                Colors.red, fireDept, (val) => setPageState(() => fireDept = val)),
             const SizedBox(height: 8),
-            _buildAgencyToggle(
-                'Police',
-                Icons.local_police,
-                Colors.blue,
-                police,
-                    (val) => setPageState(() => police = val)),
+            _buildAgencyToggle('Police', Icons.local_police, Colors.blue,
+                police, (val) => setPageState(() => police = val)),
             const SizedBox(height: 8),
-            _buildAgencyToggle(
-                'Ambulance / EMS',
-                Icons.emergency,
-                Colors.green,
-                ambulance,
-                    (val) => setPageState(() => ambulance = val)),
+            _buildAgencyToggle('Ambulance / EMS', Icons.emergency, Colors.green,
+                ambulance, (val) => setPageState(() => ambulance = val)),
             const SizedBox(height: 8),
-            _buildAgencyToggle(
-                'Notify Family Contacts',
-                Icons.family_restroom,
-                Colors.purple,
-                notifyFamily,
-                    (val) => setPageState(() => notifyFamily = val)),
+            _buildAgencyToggle('Notify Family Contacts', Icons.family_restroom,
+                Colors.purple, notifyFamily, (val) => setPageState(() => notifyFamily = val)),
 
             const SizedBox(height: 20),
 
@@ -1223,15 +1106,13 @@ class _EmergencyServicesExtendedScreenState
                   selected: isSelected,
                   onSelected: (val) {
                     if (val) {
-                      setPageState(() =>
-                      emergencyType = type['value'] as String);
+                      setPageState(() => emergencyType = type['value'] as String);
                     }
                   },
-                  selectedColor: Colors.red.withOpacity(0.3),
+                  selectedColor: Colors.red.withValues(alpha: 0.3),
                   labelStyle: TextStyle(
                     color: isSelected ? Colors.red : null,
-                    fontWeight:
-                    isSelected ? FontWeight.bold : null,
+                    fontWeight: isSelected ? FontWeight.bold : null,
                   ),
                 );
               }).toList(),
@@ -1245,8 +1126,7 @@ class _EmergencyServicesExtendedScreenState
               decoration: InputDecoration(
                 labelText: 'Emergency Description',
                 hintText: 'Describe the situation...',
-                border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10)),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
               ),
             ),
 
@@ -1255,15 +1135,13 @@ class _EmergencyServicesExtendedScreenState
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: Colors.orange.withOpacity(0.05),
+                color: Colors.orange.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                    color: Colors.orange.withOpacity(0.2)),
+                border: Border.all(color: Colors.orange.withValues(alpha: 0.2)),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.location_on,
-                      color: Colors.orange, size: 16),
+                  const Icon(Icons.location_on, color: Colors.orange, size: 16),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -1327,33 +1205,34 @@ class _EmergencyServicesExtendedScreenState
   Widget _buildAgencyToggle(String label, IconData icon, Color color,
       bool value, ValueChanged<bool> onChanged) {
     return Container(
-      padding:
-      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: value ? color.withOpacity(0.1) : Colors.transparent,
+        color: value ? color.withValues(alpha: 0.1) : Colors.transparent,
         borderRadius: BorderRadius.circular(10),
         border: Border.all(
-          color: value ? color : Colors.grey.withOpacity(0.3),
+          color: value ? color : Colors.grey.withValues(alpha: 0.3),
           width: value ? 2 : 1,
         ),
       ),
       child: Row(
         children: [
-          Icon(icon,
-              color: value ? color : Colors.grey, size: 24),
+          Icon(icon, color: value ? color : Colors.grey, size: 24),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
               label,
               style: TextStyle(
-                fontWeight:
-                value ? FontWeight.bold : FontWeight.normal,
+                fontWeight: value ? FontWeight.bold : FontWeight.normal,
                 color: value ? color : null,
               ),
             ),
           ),
           Switch(
-              value: value, onChanged: onChanged, activeColor: color),
+            value: value,
+            onChanged: onChanged,
+            activeTrackColor: color, // FIX: Replace activeColor
+            inactiveTrackColor: Colors.grey.withValues(alpha: 0.3),
+          ),
         ],
       ),
     );
@@ -1368,6 +1247,8 @@ class _EmergencyServicesExtendedScreenState
     required String description,
   }) async {
     if (!fireDept && !police && !ambulance) {
+      if (!mounted) return;
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
             content: Text('Select at least one service'),
@@ -1376,6 +1257,8 @@ class _EmergencyServicesExtendedScreenState
       return;
     }
 
+    if (!mounted) return;
+
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -1383,10 +1266,7 @@ class _EmergencyServicesExtendedScreenState
         title: Text(
           'Confirm Multi-Agency Dispatch',
           style: TextStyle(
-              color: Theme.of(context)
-                  .textTheme
-                  .headlineMedium
-                  ?.color),
+              color: Theme.of(context).textTheme.headlineMedium?.color),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -1395,28 +1275,25 @@ class _EmergencyServicesExtendedScreenState
             Text(
               'The following will be alerted:',
               style: TextStyle(
-                  color:
-                  Theme.of(context).textTheme.bodyLarge?.color),
+                  color: Theme.of(context).textTheme.bodyLarge?.color),
             ),
             const SizedBox(height: 8),
             if (fireDept)
-              _buildConfirmRow(Icons.local_fire_department,
-                  'Fire Department', Colors.red),
-            if (police)
               _buildConfirmRow(
-                  Icons.local_police, 'Police', Colors.blue),
+                  Icons.local_fire_department, 'Fire Department', Colors.red),
+            if (police)
+              _buildConfirmRow(Icons.local_police, 'Police', Colors.blue),
             if (ambulance)
-              _buildConfirmRow(Icons.emergency,
-                  'Ambulance / EMS', Colors.green),
+              _buildConfirmRow(
+                  Icons.emergency, 'Ambulance / EMS', Colors.green),
             if (notifyFamily)
-              _buildConfirmRow(Icons.family_restroom,
-                  'Family Contacts', Colors.purple),
+              _buildConfirmRow(
+                  Icons.family_restroom, 'Family Contacts', Colors.purple),
             const SizedBox(height: 12),
             const Text(
               'Only proceed if this is a real emergency.',
-              style: TextStyle(
-                  color: Colors.orange,
-                  fontWeight: FontWeight.bold),
+              style:
+              TextStyle(color: Colors.orange, fontWeight: FontWeight.bold),
             ),
           ],
         ),
@@ -1426,8 +1303,7 @@ class _EmergencyServicesExtendedScreenState
               child: const Text('Cancel')),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            style:
-            ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
             child: const Text('DISPATCH NOW'),
           ),
         ],
@@ -1443,12 +1319,11 @@ class _EmergencyServicesExtendedScreenState
     if (user == null) return;
 
     try {
-      final authProvider =
-      Provider.of<akel.AuthProvider>(context, listen: false);
+      // FIX: Use app_auth alias
+      final authProvider = Provider.of<app_auth.AuthProvider>(context, listen: false);
 
-      final docRef = await _firestore
-          .collection('multi_agency_dispatches')
-          .add({
+      final docRef =
+      await _firestore.collection('multi_agency_dispatches').add({
         'userId': user.uid,
         'userName': authProvider.userProfile?['name'] ?? 'User',
         'emergencyType': emergencyType,
@@ -1470,94 +1345,83 @@ class _EmergencyServicesExtendedScreenState
         'status': 'dispatched',
       });
 
-      if (mounted) {
-        showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (context) => AlertDialog(
-            backgroundColor: Theme.of(context).cardColor,
-            title: Row(
-              children: [
-                const Icon(Icons.hub, color: Colors.red, size: 28),
-                const SizedBox(width: 12),
-                Text(
-                  'All Services Alerted',
-                  style: TextStyle(
-                      color: Theme.of(context)
-                          .textTheme
-                          .headlineMedium
-                          ?.color),
-                ),
-              ],
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (fireDept)
-                  _buildConfirmRow(Icons.local_fire_department,
-                      'Fire Department notified', Colors.red),
-                if (police)
-                  _buildConfirmRow(Icons.local_police,
-                      'Police notified', Colors.blue),
-                if (ambulance)
-                  _buildConfirmRow(Icons.emergency,
-                      'Ambulance dispatched', Colors.green),
-                if (notifyFamily)
-                  _buildConfirmRow(Icons.family_restroom,
-                      'Family contacts alerted', Colors.purple),
-                const SizedBox(height: 12),
-                Text(
-                  'Dispatch ID: ' +
-                      docRef.id.substring(0, 8).toUpperCase(),
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: Theme.of(context)
-                        .textTheme
-                        .bodySmall
-                        ?.color,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                const Text(
-                  'Call 911 to speak directly with dispatch.',
-                  style: TextStyle(
-                      color: Colors.orange,
-                      fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('Close')),
-              ElevatedButton.icon(
-                icon: const Icon(Icons.phone),
-                label: const Text('CALL 911'),
-                style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red),
-                onPressed: () {
-                  Navigator.pop(context);
-                  _makeCall('911');
-                },
+      if (!mounted) return;
+
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => AlertDialog(
+          backgroundColor: Theme.of(context).cardColor,
+          title: Row(
+            children: [
+              const Icon(Icons.hub, color: Colors.red, size: 28),
+              const SizedBox(width: 12),
+              Text(
+                'All Services Alerted',
+                style: TextStyle(
+                    color: Theme.of(context).textTheme.headlineMedium?.color),
               ),
             ],
           ),
-        );
-      }
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (fireDept)
+                _buildConfirmRow(Icons.local_fire_department,
+                    'Fire Department notified', Colors.red),
+              if (police)
+                _buildConfirmRow(
+                    Icons.local_police, 'Police notified', Colors.blue),
+              if (ambulance)
+                _buildConfirmRow(
+                    Icons.emergency, 'Ambulance dispatched', Colors.green),
+              if (notifyFamily)
+                _buildConfirmRow(Icons.family_restroom,
+                    'Family contacts alerted', Colors.purple),
+              const SizedBox(height: 12),
+              Text(
+                'Dispatch ID: ${docRef.id.substring(0, 8).toUpperCase()}',
+                style: TextStyle(
+                  fontSize: 11,
+                  color: Theme.of(context).textTheme.bodySmall?.color,
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Call 911 to speak directly with dispatch.',
+                style: TextStyle(
+                    color: Colors.orange, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Close')),
+            ElevatedButton.icon(
+              icon: const Icon(Icons.phone),
+              label: const Text('CALL 911'),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+              onPressed: () {
+                Navigator.pop(context);
+                _makeCall('911');
+              },
+            ),
+          ],
+        ),
+      );
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text('Failed: ' + e.toString()),
-              backgroundColor: Colors.red),
-        );
-      }
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text('Failed: $e'), backgroundColor: Colors.red),
+      );
     }
   }
 
-  Widget _buildConfirmRow(
-      IconData icon, String label, Color color) {
+  Widget _buildConfirmRow(IconData icon, String label, Color color) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
       child: Row(
@@ -1565,8 +1429,7 @@ class _EmergencyServicesExtendedScreenState
           Icon(icon, color: color, size: 18),
           const SizedBox(width: 8),
           Text(label,
-              style: TextStyle(
-                  color: color, fontWeight: FontWeight.bold)),
+              style: TextStyle(color: color, fontWeight: FontWeight.bold)),
         ],
       ),
     );
@@ -1582,24 +1445,21 @@ class _EmergencyServicesExtendedScreenState
       child: ElevatedButton.icon(
         icon: Icon(icon, size: 24),
         label: Text(label,
-            style: const TextStyle(
-                fontSize: 15, fontWeight: FontWeight.bold)),
+            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
         style: ElevatedButton.styleFrom(
           backgroundColor: color,
           foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12)),
+          shape:
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
         onPressed: onPressed,
       ),
     );
   }
 
-  Widget _buildInfoCard(
-      String title, Color color, List<String> items) {
+  Widget _buildInfoCard(String title, Color color, List<String> items) {
     return Card(
-      shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -1610,8 +1470,8 @@ class _EmergencyServicesExtendedScreenState
                 Icon(Icons.info_outline, color: color, size: 20),
                 const SizedBox(width: 8),
                 Text(title,
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold, color: color)),
+                    style:
+                    TextStyle(fontWeight: FontWeight.bold, color: color)),
               ],
             ),
             const SizedBox(height: 12),
@@ -1619,17 +1479,14 @@ class _EmergencyServicesExtendedScreenState
                 .map((item) => Padding(
               padding: const EdgeInsets.only(bottom: 6),
               child: Row(
-                crossAxisAlignment:
-                CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.circle,
-                      size: 6, color: color),
+                  Icon(Icons.circle, size: 6, color: color),
                   const SizedBox(width: 8),
                   Expanded(
                       child: Text(item,
                           style: const TextStyle(
-                              fontSize: 13,
-                              height: 1.4))),
+                              fontSize: 13, height: 1.4))),
                 ],
               ),
             ))

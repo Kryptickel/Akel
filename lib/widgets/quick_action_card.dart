@@ -1,11 +1,6 @@
 import 'package:flutter/material.dart';
 
 class QuickActionCard extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final VoidCallback onTap;
-  final Color? iconColor;
 
   const QuickActionCard({
     super.key,
@@ -15,6 +10,11 @@ class QuickActionCard extends StatelessWidget {
     required this.onTap,
     this.iconColor,
   });
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+  final Color? iconColor;
 
   @override
   Widget build(BuildContext context) {

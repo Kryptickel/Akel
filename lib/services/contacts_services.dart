@@ -12,8 +12,6 @@ class ContactsService {
 // Stream of contacts for a user
   Stream<List<EmergencyContact>> getContactsStream(String userId) {
     return _getContactsCollection(userId)
-        .orderBy('priority')
-        .orderBy('createdAt', descending: true)
         .snapshots()
         .map((snapshot) {
       return snapshot.docs.map((doc) {
@@ -28,10 +26,7 @@ class ContactsService {
 // Get all contacts once
   Future<List<EmergencyContact>> getContacts(String userId) async {
     try {
-      final snapshot = await _getContactsCollection(userId)
-          .orderBy('priority')
-          .orderBy('createdAt', descending: true)
-          .get();
+      final snapshot = await _getContactsCollection(userId).get();
 
       return snapshot.docs.map((doc) {
         return EmergencyContact.fromMap(
@@ -113,7 +108,6 @@ class ContactsService {
     try {
       final snapshot = await _getContactsCollection(userId)
           .where('isActive', isEqualTo: true)
-          .orderBy('priority')
           .get();
 
       return snapshot.docs.map((doc) {

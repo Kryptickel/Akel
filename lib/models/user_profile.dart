@@ -41,6 +41,16 @@ class UserProfile {
     };
   }
 
+  /// Alias for fromMap (for compatibility with UserService)
+  factory UserProfile.fromJson(Map<String, dynamic> json) {
+    return UserProfile.fromMap(json);
+  }
+
+  /// Alias for toMap (for compatibility with UserService)
+  Map<String, dynamic> toJson() {
+    return toMap();
+  }
+
   UserProfile copyWith({
     String? id,
     String? email,
@@ -58,4 +68,18 @@ class UserProfile {
       lastLoginAt: lastLoginAt ?? this.lastLoginAt,
     );
   }
+
+  @override
+  String toString() {
+    return 'UserProfile(id: $id, name: $name, email: $email)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is UserProfile && other.id == id;
+  }
+
+  @override
+  int get hashCode => id.hashCode;
 }
